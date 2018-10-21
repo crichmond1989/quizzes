@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"encoding/csv"
 	"fmt"
 	"os"
 	"strings"
+
+	. "github.com/crichmond1989/quizzes/quiz"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 		path = os.Args[1]
 	}
 
-	questions, err := getQuestions(path)
+	quiz, err := NewQuizFromCSV(path)
 
 	if err != nil {
 		panic(err)
@@ -23,12 +24,8 @@ func main() {
 
 	correctCount := 0
 
-	for i, q := range questions {
-		number := i + 1
-		question := q[0]
-		answer := q[1]
-
-		printQuestion(number, question)
+	for _, q := range quiz.Questions {
+		q.PrintPrompt(os.Stdout)
 
 		a, err := getAnswer()
 
@@ -36,7 +33,7 @@ func main() {
 			panic(err)
 		}
 
-		correct := a == answer
+		correct := a == q.ExpectedAnswer
 
 		var resultIcon string
 
@@ -47,7 +44,7 @@ func main() {
 			resultIcon = "\u2717"
 		}
 
-		status := getStatus(correctCount, number)
+		status := getStatus(correctCount, q.Number)
 
 		fmt.Printf("%s %s", resultIcon, status)
 	}
@@ -55,28 +52,10 @@ func main() {
 	fmt.Print("\n")
 }
 
-func getQuestions(path string) ([][]string, error) {
-	file, err := os.Open(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	reader := csv.NewReader(file)
-
-	return reader.ReadAll()
-}
-
 func getStatus(correct int, total int) string {
 	perc := float64(100*correct) / float64(total)
 
 	return fmt.Sprintf("%d/%d (%.1f%%)\n", correct, total, perc)
-}
-
-func printQuestion(number int, question string) {
-	fmt.Printf("Question #%d: %s = ", number, question)
 }
 
 func getAnswer() (string, error) {
