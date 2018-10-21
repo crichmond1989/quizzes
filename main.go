@@ -38,11 +38,18 @@ func main() {
 
 		correct := a == answer
 
+		var resultIcon string
+
 		if correct {
 			correctCount++
+			resultIcon = "\u2713"
+		} else {
+			resultIcon = "\u2717"
 		}
 
-		printStatus(correctCount, number)
+		status := getStatus(correctCount, number)
+
+		fmt.Printf("%s %s", resultIcon, status)
 	}
 
 	fmt.Print("\n")
@@ -62,10 +69,10 @@ func getQuestions(path string) ([][]string, error) {
 	return reader.ReadAll()
 }
 
-func printStatus(correct int, total int) {
-	perc := float64(100 * correct) / float64(total)
+func getStatus(correct int, total int) string {
+	perc := float64(100*correct) / float64(total)
 
-	fmt.Printf("%d/%d (%.1f%%)\n", correct, total, perc)
+	return fmt.Sprintf("%d/%d (%.1f%%)\n", correct, total, perc)
 }
 
 func printQuestion(number int, question string) {
